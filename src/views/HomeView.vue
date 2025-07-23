@@ -1,40 +1,29 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+
 
 const formData = ref({
   username: '',
   password: '',
+  confirmPassword: '',
   isAustralian: false,
   reason: '',
   gender: ''
 })
 
+
+const isFriendMentioned = computed(() =>
+  formData.value.reason.toLowerCase().includes('friend')
+)
+
 const submittedCards = ref([])
-
-const submitForm = () => {
-  validateName(true)
-  validatePassword(true)
-  if (!errors.value.username && !errors.value.password) {
-    submittedCards.value.push({ ...formData.value })
-    clearForm()
-  }
-}
-
-const clearForm = () => {
-  formData.value = {
-    username: '',
-    password: '',
-    isAustralian: false,
-    reason: '',
-    gender: ''
-  }
-}
 
 const errors = ref({
   username: null,
   password: null,
+  confirmPassword: null,
   resident: null,
   gender: null,
   reason: null
@@ -70,19 +59,51 @@ const validatePassword = (blur) => {
     errors.value.password = null
   }
 }
+
+const validateConfirmPassword = (blur) => {
+  if (formData.value.password !== formData.value.confirmPassword) {
+    if (blur) errors.value.confirmPassword = 'Passwords do not match.'
+  } else {
+    errors.value.confirmPassword = null
+  }
+}
+
+const submitForm = () => {
+  validateName(true)
+  validatePassword(true)
+  validateConfirmPassword(true)
+  if (
+    !errors.value.username &&
+    !errors.value.password &&
+    !errors.value.confirmPassword
+  ) {
+    submittedCards.value.push({ ...formData.value })
+    clearForm()
+  }
+}
+
+const clearForm = () => {
+  formData.value = {
+    username: '',
+    password: '',
+    confirmPassword: '',
+    isAustralian: false,
+    reason: '',
+    gender: ''
+  }
+}
 </script>
 
 <template>
-  <!-- 🗄️ W3. Library Registration Form -->
   <div class="container mt-5">
     <div class="row">
       <div class="col-md-8 offset-md-2">
-        <h1 class="text-center">🗄️ W4. Library Registration Form</h1>
+        <h1 class="text-center">🗄️ W5. Library Registration Form</h1>
         <p class="text-center">
-          This form now includes validation. Registered users are displayed in a data table below
-          (PrimeVue).
+          Let's build some more advanced features into our form.
         </p>
         <form @submit.prevent="submitForm">
+          <!-- Username + Gender -->
           <div class="row mb-3">
             <div class="col-md-6 col-sm-6">
               <label for="username" class="form-label">Username</label>
@@ -98,6 +119,19 @@ const validatePassword = (blur) => {
             </div>
 
             <div class="col-md-6 col-sm-6">
+              <label for="gender" class="form-label">Gender</label>
+              <select class="form-select" id="gender" v-model="formData.gender" required>
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Password + Confirm Password -->
+          <div class="row mb-3">
+            <div class="col-md-6 col-sm-6">
               <label for="password" class="form-label">Password</label>
               <input
                 type="password"
@@ -109,7 +143,21 @@ const validatePassword = (blur) => {
               />
               <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
             </div>
+
+            <div class="col-md-6 col-sm-6">
+              <label for="confirm-password" class="form-label">Confirm password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="confirm-password"
+                v-model="formData.confirmPassword"
+                @blur="() => validateConfirmPassword(true)"
+              />
+              <div v-if="errors.confirmPassword" class="text-danger">{{ errors.confirmPassword }}</div>
+            </div>
           </div>
+
+          <!-- Australian Resident -->
           <div class="row mb-3">
             <div class="col-md-6 col-sm-6">
               <div class="form-check">
@@ -122,15 +170,9 @@ const validatePassword = (blur) => {
                 <label class="form-check-label" for="isAustralian">Australian Resident?</label>
               </div>
             </div>
-            <div class="col-md-6 col-sm-6">
-              <label for="gender" class="form-label">Gender</label>
-              <select class="form-select" id="gender" v-model="formData.gender" required>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
           </div>
+
+          <!-- Reason -->
           <div class="mb-3">
             <label for="reason" class="form-label">Reason for joining</label>
             <textarea
@@ -139,7 +181,12 @@ const validatePassword = (blur) => {
               rows="3"
               v-model="formData.reason"
             ></textarea>
+            <div v-if="isFriendMentioned" class="text-success mt-1">
+              Great to have a friend
+            </div>
           </div>
+
+          <!-- Buttons -->
           <div class="text-center">
             <button type="submit" class="btn btn-primary me-2">Submit</button>
             <button type="button" class="btn btn-secondary" @click="clearForm">Clear</button>
@@ -149,6 +196,7 @@ const validatePassword = (blur) => {
     </div>
   </div>
 
+  <!-- PrimeVue DataTable -->
   <div class="row mt-5">
     <h4>This is a Primevue Datatable.</h4>
     <DataTable :value="submittedCards" tableStyle="min-width: 50rem">
@@ -160,6 +208,7 @@ const validatePassword = (blur) => {
     </DataTable>
   </div>
 
+  <!-- Card Display -->
   <div class="row mt-5" v-if="submittedCards.length">
     <div class="d-flex flex-wrap justify-content-start">
       <div
@@ -184,37 +233,8 @@ const validatePassword = (blur) => {
 </template>
 
 <style scoped>
-.container {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  max-width: 80vw;
-  margin: 0 auto;
-  padding: 20px;
-  /* background-color: #e0bfbf; */
-  border-radius: 10px;
-}
-
-/* Class selectors */
 .form {
   text-align: center;
   margin-top: 50px;
-}
-
-/* ID selectors */
-#username:focus,
-#password:focus,
-#isAustralian:focus,
-.card {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.card-header {
-  background-color: #275fda;
-  color: white;
-  padding: 10px;
-  border-radius: 10px 10px 0 0;
-}
-.list-group-item {
-  padding: 10px;
 }
 </style>

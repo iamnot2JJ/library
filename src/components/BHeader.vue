@@ -1,18 +1,47 @@
 <template>
-  <!-- Using Bootstrap's Header template (starter code) -->
-  <!-- https://getbootstrap.com/docs/5.0/examples/headers/ -->
   <div class="container">
-    <header class="d-flex justify-content-center py-3">
+    <header class="d-flex justify-content-between align-items-center py-3">
       <ul class="nav nav-pills">
         <li class="nav-item">
-          <a href="#" class="nav-link active" aria-current="page">Home (Week 4)</a>
+          <router-link to="/" class="nav-link" active-class="active" aria-current="page">
+            Home (Week 5)
+          </router-link>
         </li>
-        <li class="nav-item"><a href="#" class="nav-link">About</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">Contact us</a></li>
+        <li class="nav-item">
+          <router-link to="/about" class="nav-link" active-class="active">
+            About
+          </router-link>
+        </li>
       </ul>
+
+      <!-- 登录/登出按钮 -->
+      <div>
+        <button
+          v-if="isAuthenticated"
+          class="btn btn-outline-danger"
+          @click="handleLogout"
+        >
+          Logout
+        </button>
+        <router-link v-else to="/login" class="btn btn-outline-primary">
+          Login
+        </router-link>
+      </div>
     </header>
   </div>
 </template>
+
+<script setup>
+import { isAuthenticated, logout } from '../auth'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const handleLogout = () => {
+  logout()
+  router.push('/login')
+}
+</script>
 
 <style scoped>
 .b-example-divider {
