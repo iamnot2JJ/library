@@ -1,3 +1,9 @@
+/* eslint-env node */
+module.exports = {
+  publicPath: process.env.NODE_ENV === 'production'
+    ? '/library/'
+    : '/'
+}
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
@@ -23,7 +29,10 @@ export default defineConfig({
       }
     }
   },
-  base: './',
+  // 根据环境设置 base URL
+  base: process.env.NODE_ENV === 'production' 
+    ? '/library/' 
+    : '/',
   server: {
     port: 3000,
     host: true
