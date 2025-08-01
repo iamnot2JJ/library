@@ -1,39 +1,40 @@
 <template>
   <div class="firebase-auth-container">
-    <h1>Sign in</h1>
+    <h1>Create an Account</h1>
     <p><input type="text" placeholder="Email" v-model="email" /></p>
     <p><input type="password" placeholder="Password" v-model="password" /></p>
-    <p><button @click="signin" class="auth-button">Sign in via Firebase</button></p>
+    <p><button @click="register" class="auth-button">Save to Firebase</button></p>
     
-    <!-- 添加注册链接 -->
+
     <p class="auth-link">
-      Don't have an account? 
-      <router-link to="/FireRegister" class="link-text">Register here</router-link>
+      Already have an account? 
+      <router-link to="/FireLogin" class="link-text">Sign in here</router-link>
     </p>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useRouter } from "vue-router";
+import { ref } from "vue"
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
+import { useRouter } from "vue-router"
 
-const email = ref("");
-const password = ref("");
-const router = useRouter();
-const auth = getAuth();
+const email = ref("")
+const password = ref("")
+const router = useRouter()
+const auth = getAuth()
 
-const signin = () => {
-    signInWithEmailAndPassword(auth, email.value, password.value)
+const register = () => {
+  createUserWithEmailAndPassword(auth, email.value, password.value)
     .then((userCredential) => {
-        console.log("Firebase Login Successful!");
-        console.log("Current User:", userCredential.user.email); // 使用参数
-        router.push("/");
-    }).catch((error) => {
-        console.log(error.code);
-        alert(error.message);
-    });
-};
+      console.log("Firebase Register Successful!")
+      console.log("User:", userCredential.user.email) 
+      router.push("/FireLogin")
+    })
+    .catch((error) => {
+      console.log(error.code)
+      alert(error.message)
+    })
+}
 </script>
 
 <style scoped>

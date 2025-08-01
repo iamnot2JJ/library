@@ -12,34 +12,106 @@
             About
           </router-link>
         </li>
+        <li class="nav-item">
+          <router-link to="/addbook" class="nav-link" active-class="active">
+            Add Book
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/WeatherCheck" class="nav-link" active-class="active">
+            Get Weather
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/CountBookAPI" class="nav-link" active-class="active">
+            Count Book API
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/GetAllBookAPI" class="nav-link" active-class="active">
+            Get All Books API
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/FireLogin" class="nav-link" active-class="active">
+            Firebase Login
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/FireRegister" class="nav-link" active-class="active">
+            Firebase Register
+          </router-link>
+        </li>
       </ul>
 
-      <!-- 登录/登出按钮 -->
-      <div>
-        <button
-          v-if="isAuthenticated"
-          class="btn btn-outline-danger"
-          @click="handleLogout"
-        >
-          Logout
-        </button>
-        <router-link v-else to="/login" class="btn btn-outline-primary">
-          Login
-        </router-link>
+      <!-- 用户信息和登录/登出按钮 -->
+      <div class="d-flex align-items-center">
+        <!-- 显示当前用户信息 -->
+        <div v-if="isAuthenticated && currentUser" class="me-3">
+          <span class="text-muted me-2">Welcome,</span>
+          <span class="fw-bold">{{ currentUser.displayName }}</span>
+          <span class="badge ms-2" :class="getRoleBadgeClass(currentUser.role)">
+            {{ currentUser.role }}
+          </span>
+        </div>
+
+        <!-- 登录/登出按钮组 -->
+        <div>
+          <template v-if="isAuthenticated">
+            <!-- Logout 按钮 -->
+            <router-link to="/logout" class="btn btn-outline-warning me-2">
+              <i class="bi bi-box-arrow-right me-1"></i>
+              Logout
+            </router-link>
+            <!-- 快速登出按钮 -->
+            <button
+              class="btn btn-outline-danger"
+              @click="handleQuickLogout"
+            >
+              <i class="bi bi-power me-1"></i>
+              Quick Logout
+            </button>
+          </template>
+          <template v-else>
+            <router-link to="/login" class="btn btn-outline-primary">
+              <i class="bi bi-box-arrow-in-right me-1"></i>
+              Login
+            </router-link>
+          </template>
+        </div>
       </div>
     </header>
   </div>
 </template>
 
 <script setup>
-import { isAuthenticated, logout } from '../auth'
+import { isAuthenticated, logout, currentUser, initializeAuth } from '../auth'
 import { useRouter } from 'vue-router'
+import { onMounted } from 'vue'
 
 const router = useRouter()
 
-const handleLogout = () => {
-  logout()
-  router.push('/login')
+onMounted(() => {
+  // 初始化认证状态
+  initializeAuth()
+})
+
+const handleQuickLogout = () => {
+  if (confirm('Are you sure you want to logout immediately?')) {
+    logout()
+    router.push('/login')
+  }
+}
+
+const getRoleBadgeClass = (role) => {
+  const classes = {
+    admin: 'bg-danger',
+    librarian: 'bg-warning text-dark',
+    staff: 'bg-info text-dark', 
+    student: 'bg-primary',
+    member: 'bg-secondary'
+  }
+  return classes[role] || 'bg-secondary'
 }
 </script>
 
@@ -77,5 +149,40 @@ const handleLogout = () => {
 
 .dropdown-toggle {
   outline: 0;
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* Navigation responsiveness */
+@media (max-width: 1200px) {
+  .nav {
+    flex-wrap: wrap;
+  }
+  
+  .nav-pills .nav-link {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .nav {
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .nav-pills .nav-link {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.8rem;
+    margin: 0.1rem;
+  }
 }
 </style>
